@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const API_BASE_URL = "http://127.0.0.1:8000";
+
 export type Severity = "low" | "medium" | "high" | "critical";
 
 export interface ClauseInsight {
@@ -7,6 +9,7 @@ export interface ClauseInsight {
   title: string;
   severity: Severity;
   explanation: string;
+  risk_reason?: string;
   excerpt: string;
   recommendation: string;
 }
@@ -52,18 +55,28 @@ export interface ApiError {
 }
 
 export const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    Accept: "application/json",
   },
   timeout: 30000,
 });
 
-function getErrorMessage(error: unknown, fallback: string): ApiError {
+export function getApiError(error: unknown, fallback: string): ApiError {
   if (axios.isAxiosError(error)) {
     const detail = error.response?.data?.detail;
     if (typeof detail === "string") {
       return { message: detail, status: error.response?.status };
+    }
+
+    if (Array.isArray(detail)) {
+      return {
+        message: detail
+          .map((item) => item?.msg)
+          .filter(Boolean)
+          .join(" ") || fallback,
+        status: error.response?.status,
+      };
     }
 
     return {
@@ -92,7 +105,7 @@ export async function uploadContract(file: File): Promise<UploadContractResponse
 
     return response.data;
   } catch (error) {
-    throw getErrorMessage(error, "Failed to upload contract.");
+    throw getApiError(error, "Failed to upload contract.");
   }
 }
 
@@ -104,7 +117,7 @@ export async function analyzeContract(contractId: string): Promise<AnalysisRespo
 
     return response.data;
   } catch (error) {
-    throw getErrorMessage(error, "Failed to analyze contract.");
+    throw getApiError(error, "Failed to analyze contract.");
   }
 }
 
@@ -113,6 +126,6 @@ export async function getContract(contractId: string): Promise<ContractResponse>
     const response = await api.get<ContractResponse>(`/contracts/${contractId}`);
     return response.data;
   } catch (error) {
-    throw getErrorMessage(error, "Failed to fetch contract.");
+    throw getApiError(error, "Failed to fetch contract.");
   }
 }

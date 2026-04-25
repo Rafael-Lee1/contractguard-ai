@@ -1,45 +1,41 @@
-import { CalendarClock, FileText, Sparkles } from "lucide-react";
+import { FileText, Sparkles } from "lucide-react";
 
 export function AnalysisSummary({
-  filename,
-  uploadedAt,
-  createdAt,
   summary,
+  filename,
 }: {
-  filename: string;
-  uploadedAt?: string;
-  createdAt?: string;
   summary: string;
+  filename?: string;
 }) {
   return (
-    <section className="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.1)] backdrop-blur md:p-8">
-      <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.22em] text-slate-500">Analysis Summary</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{filename}</h1>
-        </div>
-        <div className="flex flex-wrap gap-3 text-sm text-slate-600">
-          {uploadedAt ? (
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
-              <FileText className="h-4 w-4" />
-              Uploaded {new Date(uploadedAt).toLocaleDateString()}
-            </span>
-          ) : null}
-          {createdAt ? (
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
-              <CalendarClock className="h-4 w-4" />
-              Analyzed {new Date(createdAt).toLocaleDateString()}
-            </span>
-          ) : null}
+    <section className="animate-fade-in-up overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="border-b border-slate-100 px-6 py-5">
+        <div className="flex items-center gap-3">
+          <div className="rounded-xl bg-blue-50 p-2.5 text-blue-700">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Summary
+            </p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+              Executive overview
+            </h2>
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(15,23,42,1),rgba(30,41,59,0.95))] p-6 text-white">
-        <div className="flex items-center gap-2 text-emerald-300">
-          <Sparkles className="h-4 w-4" />
-          <span className="text-sm font-medium uppercase tracking-[0.22em]">Executive readout</span>
-        </div>
-        <p className="mt-4 text-base leading-8 text-slate-100">{summary}</p>
+      <div className="p-6">
+        {filename ? (
+          <div className="mb-5 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">
+            <FileText className="h-4 w-4 text-slate-400" />
+            <span className="truncate">{filename}</span>
+          </div>
+        ) : null}
+
+        <p className="text-base leading-8 text-slate-700">
+          {summary || "No summary was returned for this contract."}
+        </p>
       </div>
     </section>
   );

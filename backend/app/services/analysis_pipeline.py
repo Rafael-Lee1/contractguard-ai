@@ -105,15 +105,20 @@ class LangChainContractAnalysisPipeline:
                 merged_findings=merged_findings,
                 heuristic_snapshot=heuristic_snapshot,
             )
+            risk_clause_limit = 10 if synthesis.risk_score >= 70 else 8
 
             result = AnalysisOutput(
                 summary=synthesis.summary,
                 risk_score=synthesis.risk_score,
-                risk_clauses=merged_findings["risk_clauses"],
+                risk_clauses=self._ensure_risk_reasons(merged_findings["risk_clauses"])[
+                    :risk_clause_limit
+                ],
                 important_clauses=merged_findings["important_clauses"],
                 missing_clauses=synthesis.missing_clauses or heuristic_snapshot.missing_clauses,
-                penalties=merged_findings["penalties"],
-                unilateral_obligations=merged_findings["unilateral_obligations"],
+                penalties=self._ensure_risk_reasons(merged_findings["penalties"]),
+                unilateral_obligations=self._ensure_risk_reasons(
+                    merged_findings["unilateral_obligations"]
+                ),
             )
 
             logger.info(
@@ -188,6 +193,8 @@ class LangChainContractAnalysisPipeline:
                         "You are a senior legal contracts analyst. Review the provided contract section "
                         "and extract only findings directly supported by the text. "
                         "Focus on risk clauses, important clauses, penalties, and unilateral obligations. "
+                        "For each risk clause, include a concrete risk_reason explaining why the clause "
+                        "is harmful, abusive, one-sided, or commercially dangerous. "
                         "Do not invent clauses or speculate beyond the text."
                     ),
                 ),
@@ -281,6 +288,7 @@ class LangChainContractAnalysisPipeline:
         risk_clauses = self._merge_clause_list(
             self._flatten(chunk.risk_clauses for chunk in chunk_results),
             heuristic_snapshot.risk_clauses,
+            max_items=10,
         )
         important_clauses = self._merge_clause_list(
             self._flatten(chunk.important_clauses for chunk in chunk_results),
@@ -306,6 +314,8 @@ class LangChainContractAnalysisPipeline:
         self,
         llm_clauses: Iterable[ClauseInsight],
         fallback_clauses: Iterable[ClauseInsight],
+        *,
+        max_items: int = 8,
     ) -> list[ClauseInsight]:
         merged: dict[tuple[str, str], ClauseInsight] = {}
         for clause in [*llm_clauses, *fallback_clauses]:
@@ -321,7 +331,7 @@ class LangChainContractAnalysisPipeline:
             merged.values(),
             key=lambda item: (-SEVERITY_RANK[item.severity], item.title.lower()),
         )
-        return ordered[:8]
+        return ordered[:max_items]
 
     def _build_chunks(self, contract_text: str) -> list[str]:
         paragraphs = split_paragraphs(contract_text)
@@ -366,3 +376,12 @@ class LangChainContractAnalysisPipeline:
             key: [item.model_dump() for item in values]
             for key, values in payload.items()
         }
+
+    @staticmethod
+    def _ensure_risk_reasons(clauses: list[ClauseInsight]) -> list[ClauseInsight]:
+        return [
+            clause
+            if clause.risk_reason.strip()
+            else clause.model_copy(update={"risk_reason": clause.explanation})
+            for clause in clauses
+        ]

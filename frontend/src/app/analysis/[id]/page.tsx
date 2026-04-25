@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { ChevronLeft, LoaderCircle, RefreshCcw } from "lucide-react";
+import { AlertCircle, ArrowLeft, Layers3, RefreshCcw } from "lucide-react";
 
 import { AnalysisSummary } from "@/components/AnalysisSummary";
-import { ClauseList } from "@/components/ClauseList";
+import { ClauseCard } from "@/components/ClauseCard";
+import { RiskClauseCard } from "@/components/RiskClauseCard";
 import { RiskScoreCard } from "@/components/RiskScoreCard";
 import {
   analyzeContract,
@@ -15,6 +16,12 @@ import {
   type ApiError,
   type ContractResponse,
 } from "@/lib/api";
+
+function LoadingSpinner() {
+  return (
+    <span className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-950" />
+  );
+}
 
 export default function AnalysisPage() {
   const params = useParams<{ id: string }>();
@@ -53,7 +60,7 @@ export default function AnalysisPage() {
         }
 
         const apiError = requestError as ApiError;
-        setError(apiError.message);
+        setError(apiError.message || "Failed to load contract analysis.");
       } finally {
         if (active) {
           setIsLoading(false);
@@ -86,97 +93,140 @@ export default function AnalysisPage() {
       setAnalysis(analysisResponse);
     } catch (requestError) {
       const apiError = requestError as ApiError;
-      setError(apiError.message);
+      setError(apiError.message || "Failed to load contract analysis.");
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <main className="min-h-screen px-6 py-8 md:px-10 lg:px-12">
+    <main className="min-h-screen bg-slate-50 px-6 py-8 text-slate-950 md:px-10 lg:px-12">
       <div className="mx-auto w-full max-w-6xl">
         <Link
           href="/upload"
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm backdrop-blur transition hover:border-slate-300"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" />
           Upload another contract
         </Link>
 
         {isLoading ? (
-          <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-            <div className="rounded-full bg-slate-950 p-4 text-white">
-              <LoaderCircle className="h-8 w-8 animate-spin" />
-            </div>
+          <section className="animate-fade-in mt-10 flex min-h-[55vh] flex-col items-center justify-center gap-4 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-200/70">
+            <LoadingSpinner />
             <div className="text-center">
-              <p className="text-xl font-semibold text-slate-950">Analyzing contract...</p>
-              <p className="mt-2 text-sm text-slate-600">
-                Pulling the uploaded document and generating the AI risk readout.
+              <h1 className="text-2xl font-bold tracking-tight text-slate-950">
+                Loading analysis
+              </h1>
+              <p className="mt-2 text-sm text-slate-500">
+                Fetching the contract and preparing the dashboard.
               </p>
             </div>
-          </div>
+          </section>
         ) : error ? (
-          <div className="mt-10 rounded-[2rem] border border-rose-200 bg-white/90 p-8 shadow-[0_20px_60px_rgba(15,23,42,0.1)]">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-rose-600">Analysis failed</p>
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950">
-              We couldn&apos;t complete this contract review
+          <section className="animate-fade-in-up mt-10 rounded-2xl border border-red-200 bg-red-50 p-8 shadow-sm">
+            <div className="flex items-center gap-3 text-red-700">
+              <div className="rounded-xl bg-red-100 p-2.5">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em]">
+                Analysis failed
+              </p>
+            </div>
+            <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
+              We could not complete this contract review
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600">{error}</p>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-red-700">{error}</p>
             <button
               type="button"
               onClick={() => void retry()}
-              className="mt-8 inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition hover:bg-slate-800"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-lg"
             >
               <RefreshCcw className="h-4 w-4" />
               Retry analysis
             </button>
-          </div>
+          </section>
         ) : contract && analysis ? (
-          <div className="space-y-6 py-8">
-            <AnalysisSummary
-              filename={contract.filename}
-              uploadedAt={contract.uploaded_at}
-              createdAt={analysis.created_at}
-              summary={analysis.summary}
-            />
+          <section className="animate-fade-in-up space-y-6 py-8">
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-blue-50 p-2.5 text-blue-700">
+                  <Layers3 className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Dashboard
+                  </p>
+                  <h1 className="mt-1 text-4xl font-bold tracking-tight text-slate-950">
+                    Contract Analysis
+                  </h1>
+                </div>
+              </div>
+            </div>
 
-            <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
               <RiskScoreCard score={analysis.risk_score} />
-              <ClauseList
-                title="Missing Clauses"
-                description="Key protections or structural clauses that appear absent from the contract."
-                clauses={analysis.missing_clauses}
-                emptyMessage="No major missing clauses were detected in the current analysis."
-              />
+              <AnalysisSummary summary={analysis.summary} filename={contract.filename} />
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-2">
-              <ClauseList
-                title="Risk Clauses"
-                description="Clauses that introduce legal, financial, or operational exposure."
-                clauses={analysis.risk_clauses}
-                emptyMessage="No high-signal risk clauses were flagged."
-              />
-              <ClauseList
-                title="Important Clauses"
-                description="Material contractual terms that shape control, enforcement, and obligations."
-                clauses={analysis.important_clauses}
-                emptyMessage="No notable important clauses were extracted."
-              />
-              <ClauseList
-                title="Penalties"
-                description="Liquidated damages, penalties, fees, or other punitive payment obligations."
-                clauses={analysis.penalties}
-                emptyMessage="No penalty clauses were detected."
-              />
-              <ClauseList
-                title="Unilateral Obligations"
-                description="One-sided commitments or discretionary powers favoring one party."
-                clauses={analysis.unilateral_obligations}
-                emptyMessage="No unilateral obligations were identified."
-              />
-            </div>
-          </div>
+            <section className="rounded-2xl border border-red-200 bg-red-50/70 p-6 shadow-sm shadow-red-100/70">
+              <div className="mb-5 flex flex-col gap-2 border-b border-red-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-2 text-red-700">
+                    <AlertCircle className="h-5 w-5" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em]">
+                      Detected Risk Clauses
+                    </p>
+                  </div>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+                    Clauses that may be harmful or abusive
+                  </h2>
+                </div>
+                <span className="text-sm text-red-700">
+                  {analysis.risk_clauses.length} found
+                </span>
+              </div>
+
+              {analysis.risk_clauses.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {analysis.risk_clauses.map((clause) => (
+                    <RiskClauseCard key={`${clause.title}-${clause.severity}`} clause={clause} />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-red-200 bg-white px-5 py-8 text-center text-sm text-red-700">
+                  No explicit risk clauses detected
+                </div>
+              )}
+            </section>
+
+            <section className="rounded-2xl border border-slate-200 bg-slate-50/70 p-6 shadow-sm shadow-slate-200/60">
+              <div className="mb-5 flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Missing Clauses
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+                    Gaps requiring attention
+                  </h2>
+                </div>
+                <span className="text-sm text-slate-500">
+                  {analysis.missing_clauses.length} found
+                </span>
+              </div>
+
+              {analysis.missing_clauses.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {analysis.missing_clauses.map((clause) => (
+                    <ClauseCard key={`${clause.title}-${clause.severity}`} clause={clause} />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-8 text-center text-sm text-slate-500">
+                  No missing clauses were detected in this contract.
+                </div>
+              )}
+            </section>
+          </section>
         ) : null}
       </div>
     </main>

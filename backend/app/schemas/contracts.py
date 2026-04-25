@@ -14,6 +14,10 @@ class ClauseInsight(BaseModel):
     title: str = Field(description="Short, human-readable clause title.")
     severity: Severity = Field(description="Relative severity of the clause.")
     explanation: str = Field(description="Why the clause matters from a legal risk perspective.")
+    risk_reason: str = Field(
+        default="",
+        description="Specific reason the clause may be harmful, abusive, or commercially dangerous.",
+    )
     excerpt: str = Field(description="Exact or lightly trimmed contract excerpt supporting the finding.")
     recommendation: str = Field(description="Recommended remediation or review action.")
 

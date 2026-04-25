@@ -9,8 +9,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-space-grotesk);
-  --font-mono: var(--font-ibm-plex-mono);
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 * {
@@ -28,7 +28,7 @@ body {
     radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 30%),
     linear-gradient(180deg, #f8fafc 0%, #eef2ff 36%, #f8fafc 100%);
   color: var(--foreground);
-  font-family: var(--font-space-grotesk), sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 a {
@@ -38,4 +38,34 @@ a {
 
 ::selection {
   background: rgba(16, 185, 129, 0.24);
+}
+
+.animate-fade-in {
+  animation: fade-in 420ms ease-out both;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 480ms ease-out both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

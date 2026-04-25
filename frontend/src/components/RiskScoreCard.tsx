@@ -1,90 +1,116 @@
-import { AlertTriangle, CheckCircle2, ShieldAlert } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ShieldAlert, TrendingUp } from "lucide-react";
 
-function getScoreTone(score: number) {
-  if (score <= 30) {
+function getRiskTone(score: number) {
+  if (score >= 70) {
     return {
-      label: "Low risk",
-      stroke: "#16a34a",
-      track: "#dcfce7",
-      icon: CheckCircle2,
-      accent: "text-emerald-700",
-      chip: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      label: "High Risk",
+      description: "Immediate legal review recommended before signing.",
+      text: "text-red-700",
+      mutedText: "text-red-600",
+      border: "border-red-200",
+      bg: "bg-red-50",
+      softBg: "bg-red-100/70",
+      bar: "bg-red-500",
+      icon: ShieldAlert,
+      glow: "shadow-red-100",
     };
   }
 
-  if (score <= 60) {
+  if (score >= 40) {
     return {
-      label: "Moderate risk",
-      stroke: "#d97706",
-      track: "#fef3c7",
+      label: "Medium Risk",
+      description: "Review key terms and missing protections before approval.",
+      text: "text-yellow-700",
+      mutedText: "text-yellow-600",
+      border: "border-yellow-200",
+      bg: "bg-yellow-50",
+      softBg: "bg-yellow-100/70",
+      bar: "bg-yellow-500",
       icon: AlertTriangle,
-      accent: "text-amber-700",
-      chip: "bg-amber-50 text-amber-700 border-amber-200",
+      glow: "shadow-yellow-100",
     };
   }
 
   return {
-    label: "High risk",
-    stroke: "#dc2626",
-    track: "#fee2e2",
-    icon: ShieldAlert,
-    accent: "text-rose-700",
-    chip: "bg-rose-50 text-rose-700 border-rose-200",
+    label: "Low Risk",
+    description: "No major structural risk signals were detected.",
+    text: "text-green-700",
+    mutedText: "text-green-600",
+    border: "border-green-200",
+    bg: "bg-green-50",
+    softBg: "bg-green-100/70",
+    bar: "bg-green-500",
+    icon: CheckCircle2,
+    glow: "shadow-green-100",
   };
 }
 
 export function RiskScoreCard({ score }: { score: number }) {
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (Math.min(Math.max(score, 0), 100) / 100) * circumference;
-  const tone = getScoreTone(score);
+  const normalizedScore = Math.min(Math.max(score, 0), 100);
+  const tone = getRiskTone(normalizedScore);
   const Icon = tone.icon;
 
   return (
-    <section className="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.1)] backdrop-blur md:p-8">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.22em] text-slate-500">Risk Score</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-            Contract exposure snapshot
-          </h2>
+    <section className="animate-fade-in-up overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="border-b border-slate-100 px-6 py-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-slate-950 p-2.5 text-white shadow-sm">
+              <TrendingUp className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Risk Score
+              </p>
+              <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+                Contract exposure
+              </h2>
+            </div>
+          </div>
+
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${tone.border} ${tone.bg} ${tone.text}`}
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {tone.label}
+          </span>
         </div>
-        <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${tone.chip}`}>
-          {tone.label}
-        </span>
       </div>
 
-      <div className="mt-8 flex flex-col items-center gap-6 lg:flex-row lg:justify-between">
-        <div className="relative flex items-center justify-center">
-          <svg width="150" height="150" viewBox="0 0 150 150" className="-rotate-90">
-            <circle cx="75" cy="75" r={radius} stroke={tone.track} strokeWidth="12" fill="none" />
-            <circle
-              cx="75"
-              cy="75"
-              r={radius}
-              stroke={tone.stroke}
-              strokeWidth="12"
-              fill="none"
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-4xl font-bold tracking-tight text-slate-950">{score}</span>
-            <span className="text-xs font-medium uppercase tracking-[0.22em] text-slate-500">out of 100</span>
+      <div className="p-6">
+        <div className="grid gap-6 sm:grid-cols-[auto_1fr] sm:items-center">
+          <div
+            className={`flex h-36 w-36 items-center justify-center rounded-3xl ${tone.bg} ${tone.text} shadow-xl ${tone.glow}`}
+          >
+            <div className="text-center">
+              <div className="text-6xl font-bold tracking-tight">{normalizedScore}</div>
+              <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em]">of 100</div>
+            </div>
           </div>
-        </div>
 
-        <div className="w-full max-w-sm rounded-[1.5rem] bg-slate-50 p-5">
-          <div className={`flex items-center gap-3 ${tone.accent}`}>
-            <Icon className="h-5 w-5" />
-            <p className="font-semibold">{tone.label}</p>
+          <div>
+            <div className="mb-3 flex items-center justify-between text-xs font-medium text-slate-500">
+              <span>Low</span>
+              <span>Medium</span>
+              <span>High</span>
+            </div>
+            <div className="relative h-4 overflow-hidden rounded-full bg-slate-100">
+              <div className="absolute inset-y-0 left-[40%] w-px bg-white/80" />
+              <div className="absolute inset-y-0 left-[70%] w-px bg-white/80" />
+              <div
+                className={`h-full rounded-full ${tone.bar} transition-all duration-700 ease-out`}
+                style={{ width: `${normalizedScore}%` }}
+              />
+            </div>
+
+            <div className={`mt-5 rounded-2xl ${tone.softBg} p-4`}>
+              <div className={`flex items-center gap-2 text-sm font-semibold ${tone.text}`}>
+                <Icon className="h-4 w-4" />
+                {tone.label}
+              </div>
+              <p className={`mt-2 text-sm leading-6 ${tone.mutedText}`}>{tone.description}</p>
+            </div>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            This score blends detected risk clauses, missing protections, penalties, and one-sided
-            obligations into a single contract health indicator.
-          </p>
         </div>
       </div>
     </section>
