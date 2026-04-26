@@ -69,38 +69,38 @@ The goal is to provide **clear, actionable insights** from complex legal documen
 ```bash
 git clone https://github.com/Rafael-Lee1/contractguard-ai.git
 cd contractguard-ai
+```
 
 2. Backend setup
-
+```bash
 cd backend
-
 python -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
 
 uvicorn main:app --reload
-
+```
 
 API will be available at:
-
+```bash
 http://127.0.0.1:8000
-
+```
 Docs:
-
+```bash
 http://127.0.0.1:8000/docs
-
+```
 3. Frontend setup
-
+```bash
 cd frontend
 
 npm install
 npm run dev
-
+```
 Frontend:
-
+```bash
 http://localhost:3000
-
+```
 
 🌐 API
 
@@ -120,7 +120,7 @@ Risk score is calculated
 Results are displayed in a dashboard
 
 📦 Project Structure
-
+```bash
 contractguard-ai/
 ├── backend/
 │   ├── app/
@@ -133,21 +133,19 @@ contractguard-ai/
 │   └── app/
 │
 └── docker/
-
+```
 📌 Roadmap
  Highlight risky clauses inside the document
  Improve semantic analysis using LLMs
  Multi-contract comparison
  SaaS deployment
  User authentication
+ 
 💡 Vision
 
 Transform contract analysis into a fast, accessible, and intelligent experience, helping users make better legal decisions.
 
-👨‍💻 Author
 
-Rafael Santos
-Full Stack Developer
 
 ⭐ Contributing
 
