@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export type Severity = "low" | "medium" | "high" | "critical";
 
@@ -61,6 +61,32 @@ export const api = axios.create({
   },
   timeout: 30000,
 });
+
+// Request interceptor — log outgoing calls in development
+api.interceptors.request.use(
+  (config) => {
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor — log errors in development
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[API Error]", {
+        status: error.response?.status,
+        message: error.message,
+        data: error.response?.data,
+      });
+    }
+    return Promise.reject(error);
+  }
+);
 
 export function getApiError(error: unknown, fallback: string): ApiError {
   if (axios.isAxiosError(error)) {
