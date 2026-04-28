@@ -11,8 +11,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     log_level: str = "INFO"
 
-    database_url: str = (
-        "postgresql+psycopg://contractguard:contractguard@postgres:5432/contractguard"
+    database_url: str = Field(
+        default="postgresql+psycopg://contractguard:contractguard@postgres:5432/contractguard",
+        validation_alias="DATABASE_URL",
     )
     redis_url: str = "redis://redis:6379/0"
 
@@ -39,6 +40,17 @@ class Settings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def ensure_psycopg3_driver(cls, value: str) -> str:
+        # Railway provides DATABASE_URL with a plain postgresql:// or postgres://
+        # scheme, which SQLAlchemy maps to the legacy psycopg2 driver. Rewrite it
+        # to the psycopg v3 driver scheme so the correct installed driver is used.
+        for prefix in ("postgresql://", "postgres://"):
+            if value.startswith(prefix):
+                return "postgresql+psycopg://" + value[len(prefix):]
+        return value
 
     @field_validator("allowed_origins", mode="before")
     @classmethod
