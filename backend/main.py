@@ -53,3 +53,12 @@ def root():
         "docs": "/docs",
         "status": "ok",
     }
+
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy",
+        "service": "contractguard-ai",
+        "version": "1.0.0",
+    }
