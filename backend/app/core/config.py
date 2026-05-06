@@ -27,12 +27,15 @@ class Settings(BaseSettings):
     analysis_chunk_overlap_paragraphs: int = 1
     analysis_max_chunks: int = 8
 
+    # Comma-separated list of allowed CORS origins.
+    # In production, set the ALLOWED_ORIGINS environment variable, e.g.:
+    #   ALLOWED_ORIGINS=https://contractguard-ai-frontend-lvvz-production.up.railway.app
     allowed_origins: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:3000",
             "http://127.0.0.1:3000",
-            "https://contractguard-ai-production.up.railway.app",
-        ]
+        ],
+        validation_alias="ALLOWED_ORIGINS",
     )
 
     model_config = SettingsConfigDict(
