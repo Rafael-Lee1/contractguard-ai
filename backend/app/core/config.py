@@ -56,8 +56,30 @@ class Settings(BaseSettings):
     @field_validator("allowed_origins", mode="before")
     @classmethod
     def parse_allowed_origins(cls, value: str | list[str]) -> list[str]:
+        """
+        Parse allowed origins from environment variable.
+        Supports both JSON array format and comma-separated strings.
+
+        Examples:
+        - JSON: ["https://example.com", "https://app.example.com"]
+        - CSV: "https://example.com, https://app.example.com"
+        """
+        if isinstance(value, list):
+            return value
+
         if isinstance(value, str):
+            # Try JSON format first
+            try:
+                import json
+                parsed = json.loads(value)
+                if isinstance(parsed, list):
+                    return parsed
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+            # Fall back to comma-separated format
             return [origin.strip() for origin in value.split(",") if origin.strip()]
+
         return value
 
     @property
