@@ -1,4 +1,8 @@
-# 🚀 ContractGuard AI
+# ContractGuard AI
+
+![ContractGuard AI Banner](https://github.com/Rafael-Lee1/Icons/blob/b57b3157f876d0b3cafa97e781a7178d4b0b63fd/contract_analysis_ai.png)
+
+AI-powered platform for contract analysis and risk detection.
 
 ContractGuard AI is a full-stack application designed to analyze contracts and identify potential legal risks using a hybrid AI approach.
 
