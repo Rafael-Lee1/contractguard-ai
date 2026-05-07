@@ -1,12 +1,14 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import { AlertCircle, BarChart3, CheckCircle2, FileUp, Layers3, UploadCloud } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BarChart3, Zap, AlertCircle, CheckCircle2 } from "lucide-react";
 
 import { AnalysisSummary } from "@/components/AnalysisSummary";
 import { ClauseCard } from "@/components/ClauseCard";
 import { RiskClauseCard } from "@/components/RiskClauseCard";
 import { RiskScoreCard } from "@/components/RiskScoreCard";
+import { Button, Card, FileInput, Alert, LoadingSpinner } from "@/components/ui";
 import {
   analyzeContract,
   type AnalysisResponse,
@@ -19,15 +21,11 @@ function isPdfFile(file: File) {
   return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 }
 
-function LoadingSpinner() {
-  return (
-    <span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
-  );
-}
-
 export function ContractUploader() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadedContract, setUploadedContract] = useState<UploadContractResponse | null>(null);
+  const [uploadedContract, setUploadedContract] = useState<UploadContractResponse | null>(
+    null
+  );
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -97,180 +95,237 @@ export function ContractUploader() {
     }
   }
 
+  function handleReset() {
+    setSelectedFile(null);
+    setUploadedContract(null);
+    setAnalysisResult(null);
+    setError(null);
+  }
+
   return (
     <div className="space-y-8">
-      <section className="animate-fade-in overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70">
-        <div className="border-b border-slate-100 px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-slate-950 p-2.5 text-white">
-              <UploadCloud className="h-5 w-5" />
-            </div>
+      {/* Upload Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <Card className="p-8">
+          <div className="space-y-6">
+            {/* Header */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Upload
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600/20 to-cyan-600/20">
+                  <Zap className="w-5 h-5 text-blue-400" />
+                </div>
+                <h2 className="text-2xl font-bold">Upload Contract</h2>
+              </div>
+              <p className="text-slate-400 text-sm">
+                Select a PDF contract to analyze for risks and opportunities
               </p>
-              <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-                Start a contract review
-              </h2>
             </div>
-          </div>
-        </div>
 
-        <div className="p-6">
-        <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div>
-            <label htmlFor="contract-file" className="block text-sm font-medium text-slate-700">
-              Contract PDF
-            </label>
-            <input
-              id="contract-file"
-              type="file"
-              accept="application/pdf,.pdf"
+            {/* File Input */}
+            <FileInput
               onChange={handleFileChange}
               disabled={isLoading}
-              className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-70"
+              fileName={selectedFile?.name}
             />
-            <div className="mt-3 min-h-5 text-sm text-slate-500">
-              {selectedFile ? `Selected: ${selectedFile.name}` : "Upload one PDF contract at a time."}
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={handleUpload}
+                disabled={!selectedFile || isLoading}
+                isLoading={isUploading}
+                icon={<Zap className="w-5 h-5" />}
+              >
+                {isUploading ? "Uploading..." : "Upload Contract"}
+              </Button>
+
+              <Button
+                onClick={handleAnalyze}
+                disabled={!uploadedContract || isLoading}
+                variant="secondary"
+                isLoading={isAnalyzing}
+                icon={<BarChart3 className="w-5 h-5" />}
+              >
+                {isAnalyzing ? "Analyzing..." : "Run Analysis"}
+              </Button>
+
+              {analysisResult && (
+                <Button
+                  onClick={handleReset}
+                  variant="outline"
+                >
+                  Analyze Another
+                </Button>
+              )}
+            </div>
+
+            {/* Status Messages */}
+            <div className="space-y-2">
+              <AnimatePresence>
+                {error && (
+                  <Alert
+                    type="error"
+                    message={error}
+                    onClose={() => setError(null)}
+                  />
+                )}
+
+                {uploadedContract && !analysisResult && (
+                  <Alert
+                    type="success"
+                    message={
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-semibold">Contract uploaded</p>
+                          <p className="text-xs opacity-90 mt-1">
+                            File: {uploadedContract.filename}
+                          </p>
+                        </div>
+                      </div>
+                    }
+                  />
+                )}
+
+                {isAnalyzing && (
+                  <Alert type="info" message={
+                    <div className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" />
+                      <span>Analyzing contract with AI...</span>
+                    </div>
+                  } />
+                )}
+              </AnimatePresence>
             </div>
           </div>
+        </Card>
+      </motion.div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => void handleUpload()}
-              disabled={!selectedFile || isLoading}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-lg disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-            >
-              {isUploading ? <LoadingSpinner /> : null}
-              {!isUploading ? <FileUp className="h-4 w-4" /> : null}
-              {isUploading ? "Uploading..." : "Upload Contract"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => void handleAnalyze()}
-              disabled={!uploadedContract || isLoading}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-            >
-              {isAnalyzing ? <LoadingSpinner /> : null}
-              {!isAnalyzing ? <BarChart3 className="h-4 w-4" /> : null}
-              {isAnalyzing ? "Analyzing..." : "Analyze Contract"}
-            </button>
-          </div>
-        </div>
-
-        {error ? (
-          <div className="mt-5 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            {error}
-          </div>
-        ) : null}
-
-        {uploadedContract ? (
-          <div className="mt-5 flex items-start gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>
-              Uploaded contract ID: <span className="font-mono">{uploadedContract.id}</span>
-            </span>
-          </div>
-        ) : null}
-        </div>
-      </section>
-
-      {isAnalyzing ? (
-        <section className="animate-fade-in flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white p-8 text-sm font-medium text-slate-600 shadow-sm shadow-slate-200/70">
-          <LoadingSpinner />
-          Preparing contract analysis dashboard...
-        </section>
-      ) : null}
-
-      {analysisResult ? (
-        <section className="animate-fade-in-up space-y-6">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-700">
-                <Layers3 className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Dashboard
-                </p>
-                <h2 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
-                  Contract Analysis
-                </h2>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+      {/* Analysis Results */}
+      <AnimatePresence mode="wait">
+        {analysisResult && (
+          <motion.section
+            key="analysis"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-8"
+          >
+            {/* Risk Score Card */}
             <RiskScoreCard score={analysisResult.risk_score} />
+
+            {/* Summary */}
             <AnalysisSummary
               summary={analysisResult.summary}
               filename={uploadedContract?.filename}
             />
-          </div>
 
-          <section className="rounded-2xl border border-red-200 bg-red-50/70 p-6 shadow-sm shadow-red-100/70">
-            <div className="mb-5 flex flex-col gap-2 border-b border-red-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+            {/* Risk Clauses */}
+            {analysisResult.risk_clauses && analysisResult.risk_clauses.length > 0 && (
               <div>
-                <div className="flex items-center gap-2 text-red-700">
-                  <AlertCircle className="h-5 w-5" />
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em]">
-                    Detected Risk Clauses
-                  </p>
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <AlertCircle className="w-6 h-6 text-red-400" />
+                  High-Risk Clauses
+                </h3>
+                <div className="grid gap-4">
+                  {analysisResult.risk_clauses.map((clause, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                    >
+                      <RiskClauseCard clause={clause} />
+                    </motion.div>
+                  ))}
                 </div>
-                <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-                  Clauses that may be harmful or abusive
-                </h3>
-              </div>
-              <span className="text-sm text-red-700">
-                {analysisResult.risk_clauses.length} found
-              </span>
-            </div>
-
-            {analysisResult.risk_clauses.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2">
-                {analysisResult.risk_clauses.map((clause) => (
-                  <RiskClauseCard key={`${clause.title}-${clause.severity}`} clause={clause} />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-red-200 bg-white px-5 py-8 text-center text-sm text-red-700">
-                No explicit risk clauses detected
               </div>
             )}
-          </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-slate-50/70 p-6 shadow-sm shadow-slate-200/60">
-            <div className="mb-5 flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+            {/* Important Clauses */}
+            {analysisResult.important_clauses &&
+              analysisResult.important_clauses.length > 0 && (
+                <div>
+                  <h3 className="text-2xl font-bold mb-6">Important Clauses</h3>
+                  <div className="grid gap-4">
+                    {analysisResult.important_clauses.map((clause, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                      >
+                        <ClauseCard clause={clause} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            {/* Missing Clauses */}
+            {analysisResult.missing_clauses && analysisResult.missing_clauses.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Missing Clauses
-                </p>
-                <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-                  Gaps requiring attention
-                </h3>
-              </div>
-              <span className="text-sm text-slate-500">
-                {analysisResult.missing_clauses.length} found
-              </span>
-            </div>
-
-            {analysisResult.missing_clauses.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2">
-                {analysisResult.missing_clauses.map((clause) => (
-                  <ClauseCard key={`${clause.title}-${clause.severity}`} clause={clause} />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-8 text-center text-sm text-slate-500">
-                No missing clauses were detected in this contract.
+                <h3 className="text-2xl font-bold mb-6">Missing Protections</h3>
+                <div className="grid gap-4">
+                  {analysisResult.missing_clauses.map((clause, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                    >
+                      <ClauseCard clause={clause} />
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             )}
-          </section>
-        </section>
-      ) : null}
+
+            {/* Penalties */}
+            {analysisResult.penalties && analysisResult.penalties.length > 0 && (
+              <div>
+                <h3 className="text-2xl font-bold mb-6">Penalty Clauses</h3>
+                <div className="grid gap-4">
+                  {analysisResult.penalties.map((clause, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                    >
+                      <ClauseCard clause={clause} />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Unilateral Obligations */}
+            {analysisResult.unilateral_obligations &&
+              analysisResult.unilateral_obligations.length > 0 && (
+                <div>
+                  <h3 className="text-2xl font-bold mb-6">Unilateral Obligations</h3>
+                  <div className="grid gap-4">
+                    {analysisResult.unilateral_obligations.map((clause, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                      >
+                        <ClauseCard clause={clause} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              )}
+          </motion.section>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

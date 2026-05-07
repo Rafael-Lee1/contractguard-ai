@@ -1,4 +1,5 @@
 import { AlertCircle, CheckCircle2, Lightbulb, ShieldAlert } from "lucide-react";
+import { motion } from "framer-motion";
 
 import type { MissingClauseInsight, Severity } from "@/lib/api";
 
@@ -7,21 +8,24 @@ function getSeverityStyles(severity: Severity) {
     case "critical":
     case "high":
       return {
-        badge: "border-red-200 bg-red-50 text-red-700",
-        icon: "bg-red-50 text-red-700",
+        badge: "bg-red-500/20 border border-red-500/30 text-red-300",
+        icon: "bg-red-500/20 text-red-400",
         Icon: ShieldAlert,
+        accent: "text-red-400",
       };
     case "medium":
       return {
-        badge: "border-yellow-200 bg-yellow-50 text-yellow-700",
-        icon: "bg-yellow-50 text-yellow-700",
+        badge: "bg-yellow-500/20 border border-yellow-500/30 text-yellow-300",
+        icon: "bg-yellow-500/20 text-yellow-400",
         Icon: AlertCircle,
+        accent: "text-yellow-400",
       };
     default:
       return {
-        badge: "border-green-200 bg-green-50 text-green-700",
-        icon: "bg-green-50 text-green-700",
+        badge: "bg-green-500/20 border border-green-500/30 text-green-300",
+        icon: "bg-green-500/20 text-green-400",
         Icon: CheckCircle2,
+        accent: "text-green-400",
       };
   }
 }
@@ -31,41 +35,63 @@ export function ClauseCard({ clause }: { clause: MissingClauseInsight }) {
   const SeverityIcon = severity.Icon;
 
   return (
-    <article className="animate-fade-in-up rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/60 transition duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg">
+    <motion.article
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      whileHover={{ y: -4 }}
+      className="glass rounded-2xl p-6 border border-slate-700/30 hover:border-slate-600/50 transition-all group"
+    >
       <div className="flex items-start gap-4">
-        <div className={`rounded-xl p-2.5 ${severity.icon}`}>
-          <SeverityIcon className="h-5 w-5" />
-        </div>
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          className={`rounded-lg p-2.5 ${severity.icon} flex-shrink-0`}
+        >
+          <SeverityIcon className="w-5 h-5" />
+        </motion.div>
+
         <div className="min-w-0 flex-1">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <h3 className="text-base font-semibold leading-6 text-slate-950">{clause.title}</h3>
-            <span
-              className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold capitalize ${severity.badge}`}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <h3 className="text-lg font-semibold text-slate-100 leading-snug">
+              {clause.title}
+            </h3>
+            <motion.span
+              whileHover={{ scale: 1.05 }}
+              className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${severity.badge} flex-shrink-0`}
             >
               {clause.severity}
-            </span>
+            </motion.span>
           </div>
         </div>
       </div>
 
-      <div className="my-5 h-px bg-slate-100" />
+      {/* Divider */}
+      <div className="my-4 h-px bg-gradient-to-r from-slate-700/50 to-transparent" />
 
-      <div className="space-y-5">
+      <div className="space-y-4">
+        {/* Explanation */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-            Explanation
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            📋 Explanation
           </p>
-          <p className="mt-2 text-sm leading-6 text-slate-700">{clause.explanation}</p>
+          <p className="text-sm text-slate-300 leading-relaxed">{clause.explanation}</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-            <Lightbulb className="h-4 w-4 text-slate-400" />
-            Recommendation
+        {/* Recommendation */}
+        <motion.div
+          whileHover={{ borderColor: "rgb(59, 130, 246)" }}
+          className="rounded-xl bg-slate-800/40 border border-slate-700/30 p-4 transition-colors"
+        >
+          <div className="flex items-start gap-2 mb-2">
+            <Lightbulb className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
+              💡 Recommendation
+            </p>
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-700">{clause.recommendation}</p>
-        </div>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            {clause.recommendation}
+          </p>
+        </motion.div>
       </div>
-    </article>
+    </motion.article>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
+import { Header } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "ContractGuard AI",
@@ -14,7 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="relative">
+        <Header />
+        <main className="relative z-10 min-h-screen">{children}</main>
+      </body>
     </html>
   );
 }

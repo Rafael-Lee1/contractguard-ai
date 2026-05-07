@@ -1,4 +1,5 @@
 import { FileText, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 
 export function AnalysisSummary({
   summary,
@@ -7,36 +8,67 @@ export function AnalysisSummary({
   summary: string;
   filename?: string;
 }) {
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 },
+  };
+
   return (
-    <section className="animate-fade-in-up overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg">
-      <div className="border-b border-slate-100 px-6 py-5">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-blue-50 p-2.5 text-blue-700">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Summary
-            </p>
-            <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Executive overview
-            </h2>
-          </div>
+    <motion.section
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="glass rounded-2xl p-8 border border-cyan-500/20 overflow-hidden group hover:border-cyan-500/40 transition-all hover:shadow-2xl hover:shadow-cyan-500/10"
+    >
+      {/* Background gradient */}
+      <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-cyan-600/10 to-blue-600/10 blur-3xl -z-10" />
+
+      <motion.div variants={item} className="flex items-start gap-3 mb-6">
+        <motion.div
+          whileHover={{ scale: 1.1, rotate: 10 }}
+          className="p-3 rounded-lg bg-gradient-to-br from-cyan-600/20 to-blue-600/20"
+        >
+          <Sparkles className="w-6 h-6 text-cyan-400" />
+        </motion.div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+            AI Analysis
+          </p>
+          <h2 className="text-2xl font-bold">Executive Summary</h2>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="p-6">
-        {filename ? (
-          <div className="mb-5 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">
-            <FileText className="h-4 w-4 text-slate-400" />
-            <span className="truncate">{filename}</span>
-          </div>
-        ) : null}
+      {filename && (
+        <motion.div
+          variants={item}
+          className="mb-6 flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-700/40 bg-slate-800/20 hover:bg-slate-800/40 transition-colors"
+        >
+          <FileText className="w-4 h-4 text-slate-400" />
+          <span className="truncate text-sm text-slate-300 font-medium">{filename}</span>
+        </motion.div>
+      )}
 
-        <p className="text-base leading-8 text-slate-700">
-          {summary || "No summary was returned for this contract."}
+      <motion.div
+        variants={item}
+        className="prose prose-invert max-w-none"
+      >
+        <p className="text-base leading-8 text-slate-200 whitespace-pre-wrap">
+          {summary || "No summary available for this contract."}
         </p>
-      </div>
-    </section>
+      </motion.div>
+
+      {/* Bottom accent */}
+      <div className="mt-6 h-px bg-gradient-to-r from-cyan-500/30 via-blue-500/30 to-transparent" />
+    </motion.section>
   );
 }

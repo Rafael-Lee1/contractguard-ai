@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, ShieldAlert, TrendingUp } from "lucide-react";
 
 function getRiskTone(score: number) {
@@ -5,14 +6,12 @@ function getRiskTone(score: number) {
     return {
       label: "High Risk",
       description: "Immediate legal review recommended before signing.",
-      text: "text-red-700",
-      mutedText: "text-red-600",
-      border: "border-red-200",
-      bg: "bg-red-50",
-      softBg: "bg-red-100/70",
-      bar: "bg-red-500",
+      textColor: "text-red-400",
+      bgColor: "bg-red-500/10",
+      borderColor: "border-red-500/30",
+      gradientFrom: "#ef4444",
+      gradientTo: "#dc2626",
       icon: ShieldAlert,
-      glow: "shadow-red-100",
     };
   }
 
@@ -20,28 +19,24 @@ function getRiskTone(score: number) {
     return {
       label: "Medium Risk",
       description: "Review key terms and missing protections before approval.",
-      text: "text-yellow-700",
-      mutedText: "text-yellow-600",
-      border: "border-yellow-200",
-      bg: "bg-yellow-50",
-      softBg: "bg-yellow-100/70",
-      bar: "bg-yellow-500",
+      textColor: "text-yellow-400",
+      bgColor: "bg-yellow-500/10",
+      borderColor: "border-yellow-500/30",
+      gradientFrom: "#eab308",
+      gradientTo: "#ca8a04",
       icon: AlertTriangle,
-      glow: "shadow-yellow-100",
     };
   }
 
   return {
     label: "Low Risk",
     description: "No major structural risk signals were detected.",
-    text: "text-green-700",
-    mutedText: "text-green-600",
-    border: "border-green-200",
-    bg: "bg-green-50",
-    softBg: "bg-green-100/70",
-    bar: "bg-green-500",
+    textColor: "text-green-400",
+    bgColor: "bg-green-500/10",
+    borderColor: "border-green-500/30",
+    gradientFrom: "#22c55e",
+    gradientTo: "#16a34a",
     icon: CheckCircle2,
-    glow: "shadow-green-100",
   };
 }
 
@@ -49,70 +44,168 @@ export function RiskScoreCard({ score }: { score: number }) {
   const normalizedScore = Math.min(Math.max(score, 0), 100);
   const tone = getRiskTone(normalizedScore);
   const Icon = tone.icon;
+  const circumference = 2 * Math.PI * 45;
+  const strokeDashoffset = circumference - (normalizedScore / 100) * circumference;
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 },
+  };
 
   return (
-    <section className="animate-fade-in-up overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg">
-      <div className="border-b border-slate-100 px-6 py-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-slate-950 p-2.5 text-white shadow-sm">
-              <TrendingUp className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Risk Score
-              </p>
-              <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-                Contract exposure
-              </h2>
-            </div>
-          </div>
-
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${tone.border} ${tone.bg} ${tone.text}`}
-          >
-            <Icon className="h-3.5 w-3.5" />
-            {tone.label}
-          </span>
-        </div>
-      </div>
-
-      <div className="p-6">
-        <div className="grid gap-6 sm:grid-cols-[auto_1fr] sm:items-center">
-          <div
-            className={`flex h-36 w-36 items-center justify-center rounded-3xl ${tone.bg} ${tone.text} shadow-xl ${tone.glow}`}
-          >
-            <div className="text-center">
-              <div className="text-6xl font-bold tracking-tight">{normalizedScore}</div>
-              <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em]">of 100</div>
-            </div>
-          </div>
-
-          <div>
-            <div className="mb-3 flex items-center justify-between text-xs font-medium text-slate-500">
-              <span>Low</span>
-              <span>Medium</span>
-              <span>High</span>
-            </div>
-            <div className="relative h-4 overflow-hidden rounded-full bg-slate-100">
-              <div className="absolute inset-y-0 left-[40%] w-px bg-white/80" />
-              <div className="absolute inset-y-0 left-[70%] w-px bg-white/80" />
-              <div
-                className={`h-full rounded-full ${tone.bar} transition-all duration-700 ease-out`}
-                style={{ width: `${normalizedScore}%` }}
+    <motion.section
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className={`glass rounded-2xl p-8 border ${tone.borderColor} overflow-hidden group hover:shadow-2xl hover:shadow-blue-500/10 transition-all`}
+    >
+      <div className="grid md:grid-cols-[180px_1fr] gap-8 items-center">
+        {/* Radial Chart */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="flex justify-center"
+        >
+          <div className="relative w-40 h-40">
+            {/* Background circle */}
+            <svg
+              className="absolute inset-0 transform -rotate-90"
+              viewBox="0 0 100 100"
+            >
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.05)"
+                strokeWidth="8"
               />
-            </div>
+              {/* Progress circle */}
+              <motion.circle
+                initial={{ strokeDashoffset: circumference }}
+                animate={{ strokeDashoffset }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke={`url(#gradient)`}
+                strokeWidth="8"
+                strokeLinecap="round"
+                style={{
+                  strokeDasharray: circumference,
+                }}
+              />
+              <defs>
+                <linearGradient
+                  id="gradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
+                  <stop offset="0%" stopColor={tone.gradientFrom} />
+                  <stop offset="100%" stopColor={tone.gradientTo} />
+                </linearGradient>
+              </defs>
+            </svg>
 
-            <div className={`mt-5 rounded-2xl ${tone.softBg} p-4`}>
-              <div className={`flex items-center gap-2 text-sm font-semibold ${tone.text}`}>
-                <Icon className="h-4 w-4" />
-                {tone.label}
-              </div>
-              <p className={`mt-2 text-sm leading-6 ${tone.mutedText}`}>{tone.description}</p>
-            </div>
+            {/* Center content */}
+            <motion.div
+              variants={item}
+              className="absolute inset-0 flex flex-col items-center justify-center"
+            >
+              <div className="text-4xl font-bold">{normalizedScore}</div>
+              <div className="text-xs text-slate-400 font-medium">of 100</div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Content */}
+        <motion.div variants={container} className="space-y-6">
+          {/* Title and Badge */}
+          <motion.div variants={item}>
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  Risk Analysis
+                </p>
+                <h3 className="text-2xl font-bold">Contract Exposure</h3>
+              </div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 ${tone.bgColor} border ${tone.borderColor}`}
+              >
+                <Icon className={`w-4 h-4 ${tone.textColor}`} />
+                <span className={`text-sm font-semibold ${tone.textColor}`}>
+                  {tone.label}
+                </span>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Risk description */}
+          <motion.p
+            variants={item}
+            className="text-slate-300 leading-relaxed text-sm"
+          >
+            {tone.description}
+          </motion.p>
+
+          {/* Risk breakdown */}
+          <motion.div
+            variants={item}
+            className="space-y-3 pt-4 border-t border-slate-700/50"
+          >
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-400">Risk Level</span>
+              <div className="flex gap-2">
+                {["Low", "Medium", "High"].map((level, i) => (
+                  <motion.div
+                    key={level}
+                    className={`h-1.5 w-3 rounded-full transition-all ${
+                      (level === "Low" && normalizedScore < 40) ||
+                      (level === "Medium" &&
+                        normalizedScore >= 40 &&
+                        normalizedScore < 70) ||
+                      (level === "High" && normalizedScore >= 70)
+                        ? `${tone.bgColor} ${tone.borderColor} border`
+                        : "bg-slate-700/40"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Action button */}
+          <motion.div
+            variants={item}
+            className="flex items-center gap-2 pt-2 text-blue-400 text-sm font-medium hover:gap-3 transition-all cursor-pointer group/link"
+          >
+            <TrendingUp className="w-4 h-4" />
+            <span>View detailed breakdown</span>
+            <motion.span
+              animate={{ x: 0 }}
+              whileHover={{ x: 4 }}
+              className="text-blue-400"
+            >
+              →
+            </motion.span>
+          </motion.div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 }

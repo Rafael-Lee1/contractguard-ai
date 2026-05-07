@@ -1,15 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f7fb;
-  --foreground: #0f172a;
-  --surface: rgba(255, 255, 255, 0.84);
+  --background: #0a0e27;
+  --foreground: #f5f7fb;
+  --surface: rgba(15, 23, 42, 0.7);
+  --primary: #3b82f6;
+  --primary-dark: #1e40af;
+  --accent: #06b6d4;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
@@ -23,12 +26,48 @@ html {
 
 body {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(16, 185, 129, 0.16), transparent 26%),
-    radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 30%),
-    linear-gradient(180deg, #f8fafc 0%, #eef2ff 36%, #f8fafc 100%);
+  background: linear-gradient(135deg, #0a0e27 0%, #0f1637 25%, #1a0a2e 50%, #0a0e27 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Animated background elements */
+body::before {
+  content: "";
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+      circle at 20% 50%,
+      rgba(59, 130, 246, 0.15),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(6, 182, 212, 0.1),
+      transparent 50%
+    ),
+    radial-gradient(circle at 40% 30%, rgba(168, 85, 247, 0.08), transparent 50%);
+  animation: shift 15s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Animated grid background */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.02) 25%, rgba(255, 255, 255, 0.02) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.02) 75%, rgba(255, 255, 255, 0.02) 76%, transparent 77%, transparent),
+    linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, 0.02) 25%, rgba(255, 255, 255, 0.02) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.02) 75%, rgba(255, 255, 255, 0.02) 76%, transparent 77%, transparent);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: 1;
 }
 
 a {
@@ -37,22 +76,48 @@ a {
 }
 
 ::selection {
-  background: rgba(16, 185, 129, 0.24);
+  background: rgba(59, 130, 246, 0.3);
+  color: var(--foreground);
 }
 
+/* Smooth animations */
 .animate-fade-in {
-  animation: fade-in 420ms ease-out both;
+  animation: fade-in 500ms cubic-bezier(0.23, 1, 0.320, 1) both;
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 480ms ease-out both;
+  animation: fade-in-up 600ms cubic-bezier(0.23, 1, 0.320, 1) both;
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 500ms cubic-bezier(0.23, 1, 0.320, 1) both;
+}
+
+.animate-scale-in {
+  animation: scale-in 500ms cubic-bezier(0.23, 1, 0.320, 1) both;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 600ms cubic-bezier(0.23, 1, 0.320, 1) both;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes shift {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-30px, -30px);
+  }
 }
 
 @keyframes fade-in {
   from {
     opacity: 0;
   }
-
   to {
     opacity: 1;
   }
@@ -61,11 +126,97 @@ a {
 @keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
+  }
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-light {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Smooth transitions */
+* {
+  @apply transition-colors duration-300;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
 }
